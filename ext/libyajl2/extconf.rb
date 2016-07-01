@@ -27,6 +27,11 @@ module Libyajl2Build
     !!(RUBY_PLATFORM =~ /mswin|mingw|cygwin|windows/)
   end
 
+  def self.omnios?
+    # Need a better check, but RUBY_PLATFORM doesn't actually contain OmniOS-specific substring
+    !!(RUBY_PLATFORM =~ /solaris/)
+  end
+
   def self.libyajl2_vendor_dir
     LIBYAJL2_VENDOR_DIR
   end
@@ -101,7 +106,11 @@ EOF
 
       system("pwd")
       # we cheat and build it right away...
-      system("make >make.out 2>&1") || raise # rubinius doesn't like the output this generates
+      if omnios?
+        system("gmake >make.out 2>&1") || raise # rubinius doesn't like the output this generates
+      else
+        system("make >make.out 2>&1") || raise # rubinius doesn't like the output this generates
+      end
       # ...so we can hack up what install does later and copy over the include files
 
       File.open("Makefile", "w+") do |f|
